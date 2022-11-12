@@ -8,6 +8,7 @@ import 'package:kim_app/screens/homescreen.dart';
 import 'package:kim_app/screens/step1_2_GirlChoiceButton_view.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../Tools/SlideRightRoute.dart';
 import '../Tools/constants.dart';
@@ -28,24 +29,86 @@ class _Step2_video_viewState extends State<Step2_video_view> {
       if (video == null) {
         return;
       }
-      final videoPermanent = await saveFilePermanently(video.path);
-      setState(() {
-        _video = videoPermanent;
-      });
+      await saveVideo(video.path);
     } catch (e) {
       print('Failed to pick image: $e');
     }
   }
 
-  Future<File> saveFilePermanently(String videoPath) async {
-    final directory = await getExternalStorageDirectory();
+  //Future<File> saveVideo(String videoPath) async {
+    // final directory = await getExternalStorageDirectory();
+    //
+    // final name = basename(videoPath);
+    // final video = File('${directory?.path}/$name');
+    // print(name);
+    // print(video);
+    //
+    // return File(videoPath).copy(video.path);
+  // }
 
-    final name = basename(videoPath);
-    final video = File('${directory?.path}/$name');
-    print(name);
-    print(video);
+    Future<bool> saveVideo(String fileName) async {
+      Directory directory;
+      try {
+        if (Platform.isAndroid) {
+          if (await _requestPermission(Permission.storage)) {
+            directory = await getExternalStorageDirectory() as Directory;
+            //儲存在SD卡中(外部儲存裝置的路徑) getExternalStorageDirectory()
+            String newPath = "";
+            print(directory);
+            List<String> paths = directory.path.split("/");
+            //把遇到資料夾的位置進行分裂 ex.C:\Users\ASUS  ==> ['Users','ASUS']
+            for (int x = 1; x < paths.length; x++) {
+              String folder = paths[x];
+              if (folder != "Android") {
+                newPath += "/" + folder;
+              } else {
+                break;
+              }
+            }
+            newPath = newPath + "/myApp";
+            directory = Directory(newPath);
+            print(directory);
+          } else {
+            return false;
+          }
+        } else {
+          if (await _requestPermission(Permission.photos)) {
+            directory = await getTemporaryDirectory();
+          } else {
+            return false;
+          }
+        }
 
-    return File(videoPath).copy(video.path);
+        //File saveFile = File("${directory.path}/$fileName");
+        if (!await directory.exists()) {
+          await directory.create(recursive: true);
+        }
+        if (await directory.exists()) {
+          final name = basename(fileName);
+          final video = File('${directory?.path}/$name');
+          File(fileName).copy(video.path);
+        }
+        return false;
+      } catch (e) {
+        print(e);
+        return false;
+      }
+    }
+
+
+  Future<bool> _requestPermission(Permission permission) async {
+    if (await permission.isGranted) {
+      //確認是否通過權限，發起權限申請
+      return true;
+    } else {
+      var result = await permission.request(); //若為否回傳"要求權限"
+      if (result == PermissionStatus.granted) {
+        //判斷現在權限是否通過
+        return true;
+      } else {
+        return false;
+      }
+    }
   }
 
   @override
