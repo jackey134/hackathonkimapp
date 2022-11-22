@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:external_path/external_path.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -21,7 +22,16 @@ Future<bool> saveVideo(String fileName) async {
   try {
     if (Platform.isAndroid) {
       if (await _requestPermission(Permission.camera)) {
-        GallerySaver.saveVideo(fileName, toDcim: true ,albumName: "app");
+        if(await _requestPermission(Permission.storage)){
+          GallerySaver.saveVideo(fileName, toDcim: true ,albumName: "app");
+          // final path = await ExternalPath.getExternalStoragePublicDirectory(
+          //     ExternalPath.DIRECTORY_DCIM);
+          // print(path);
+
+          //await GallerySaver.saveVideo('$path/savevideotest');
+          // await fileName.copy('$path/save');
+        }
+
       } else {
         return false;
       }

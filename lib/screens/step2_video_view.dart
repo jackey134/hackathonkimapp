@@ -1,15 +1,11 @@
 import 'dart:io';
 import '../Tools/SlideRightRoute.dart';
 import '../Tools/constants.dart';
-import '../Tools/getVideo.dart';
 import 'package:flutter/material.dart';
-import 'package:gallery_saver/gallery_saver.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:kim_app/Tools/SlideLeftRoute.dart';
 import 'package:kim_app/Tools/widgetfunction.dart';
-import 'package:kim_app/screens/homescreen.dart';
+import 'package:kim_app/Tools/camera_tools/camera_screen.dart';
 import 'package:kim_app/screens/step1_2_GirlChoiceButton_view.dart';
-
 
 class Step2_video_view extends StatefulWidget {
   const Step2_video_view({Key? key}) : super(key: key);
@@ -19,12 +15,13 @@ class Step2_video_view extends StatefulWidget {
 }
 
 class _Step2_video_viewState extends State<Step2_video_view> {
-
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     final double padding = 10;
     final sidepadding = EdgeInsets.symmetric(horizontal: padding);
+
+
     return SafeArea(
       child: Scaffold(
         backgroundColor: COLOR_ORANGE,
@@ -56,7 +53,9 @@ class _Step2_video_viewState extends State<Step2_video_view> {
             GestureDetector(
               behavior: HitTestBehavior.translucent,
               onTap: () {
-                getVideo(ImageSource.camera);
+                //getVideo(ImageSource.camera);
+                Navigator.push(
+                    context, SlideRightRoute(widget: CameraScreen()));
               },
               child: Container(
                 margin: EdgeInsets.only(left: 120, top: 180),

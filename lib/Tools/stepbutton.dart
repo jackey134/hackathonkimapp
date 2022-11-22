@@ -19,7 +19,7 @@ class Stepbutton extends StatelessWidget {
               "Let's Begin",
               style: themeData.textTheme.headline2,
             ),
-            SizedBox(
+            const SizedBox(
               height: 70,
             ),
           ],
