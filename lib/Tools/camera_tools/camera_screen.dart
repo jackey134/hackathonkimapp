@@ -2,12 +2,15 @@ import 'dart:io';
 import 'dart:developer';
 
 import 'package:camera/camera.dart';
+import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:kim_app/Tools/camera_tools/preview_screen.dart';
+import 'package:kim_app/Tools/folders/create_folder.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:video_player/video_player.dart';
+import 'package:kim_app/Tools/constants.dart';
 
 import 'package:kim_app/main.dart';
 
@@ -46,9 +49,13 @@ class _CameraScreenState extends State<CameraScreen>
 
   ResolutionPreset currentResolutionPreset = ResolutionPreset.high;
 
+  String _exPath = "";
+
+
   getPermissionStatus() async {
     await Permission.camera.request();
     var status = await Permission.camera.status;
+    await Permission.manageExternalStorage.request();
 
     if (status.isGranted) {
       log('Camera Permission: GRANTED');
@@ -56,6 +63,7 @@ class _CameraScreenState extends State<CameraScreen>
         _isCameraPermissionGranted = true;
       });
       // Set and initialize the new camera
+      createNewDir();
       onNewCameraSelected(cameras[0]);
       //refreshAlreadyCapturedImages();
     } else {
@@ -94,6 +102,18 @@ class _CameraScreenState extends State<CameraScreen>
   //     setState(() {});
   //   }
   // }
+
+  //取得路徑==>要將自己的狀態更新為新的路徑
+  Future<void> getPublicDirectoryPath() async {
+    String path;
+
+    path = "${await ExternalPath.getExternalStoragePublicDirectory(
+        ExternalPath.DIRECTORY_DCIM)}/app";
+
+    setState(() {
+      _exPath = path; // /storage/emulated/0/Download
+    });
+  }
 
   Future<XFile?> takePicture() async {
     final CameraController? cameraController = controller;
@@ -174,6 +194,8 @@ class _CameraScreenState extends State<CameraScreen>
       print('Error pausing video recording: $e');
     }
   }
+
+
 
   Future<void> resumeVideoRecording() async {
     if (!controller!.value.isRecordingVideo) {
@@ -265,6 +287,7 @@ class _CameraScreenState extends State<CameraScreen>
     SystemChrome.setEnabledSystemUIOverlays([]);
     getPermissionStatus();
     super.initState();
+    getPublicDirectoryPath();
   }
 
   @override
@@ -534,9 +557,6 @@ class _CameraScreenState extends State<CameraScreen>
                                                           .now()
                                                       .millisecondsSinceEpoch;
 
-                                                  final directory =
-                                                      await getApplicationDocumentsDirectory();
-
                                                   String fileFormat = videoFile
                                                       .path
                                                       .split('.')
@@ -544,7 +564,7 @@ class _CameraScreenState extends State<CameraScreen>
 
                                                   _videoFile =
                                                       await videoFile.copy(
-                                                    '${directory.path}/$currentUnix.$fileFormat',
+                                                    '$_exPath/$currentUnix.$fileFormat',
                                                   );
 
                                                   _startVideoPlayer();
@@ -558,11 +578,10 @@ class _CameraScreenState extends State<CameraScreen>
                                                 File imageFile =
                                                     File(rawImage!.path);
 
+                                                print(imageFile);
+
                                                 int currentUnix = DateTime.now()
                                                     .millisecondsSinceEpoch;
-
-                                                final directory =
-                                                    await getApplicationDocumentsDirectory();
 
                                                 String fileFormat = imageFile
                                                     .path
@@ -571,11 +590,10 @@ class _CameraScreenState extends State<CameraScreen>
 
                                                 print(fileFormat);
 
-                                                await imageFile.copy(
-                                                  '${directory.path}/$currentUnix.$fileFormat',
+                                                imageFile.copy(
+                                                  '$_exPath/$currentUnix.$fileFormat',
                                                 );
 
-                                                //refreshAlreadyCapturedImages();
                                               },
                                         child: Stack(
                                           alignment: Alignment.center,
@@ -606,24 +624,27 @@ class _CameraScreenState extends State<CameraScreen>
                                         ),
                                       ),
                                       InkWell(
-                                        onTap: _imageFile != null ||
-                                                _videoFile != null
-                                            ? () {
-                                                Navigator.of(context).push(
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        PreviewScreen(
-                                                      imageFile: _imageFile!,
-                                                      fileList: allFileList,
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                            : null,
+                                        onTap:  () {
+                                               Navigator.push(context, route);
+                                              },
                                         child: Container(
                                           width: 60,
                                           height: 60,
-
+                                          child: Stack(
+                                            alignment: Alignment.center,
+                                            children: const [
+                                            Icon(
+                                              Icons.circle,
+                                              color: Colors.black38,
+                                              size: 60,
+                                            ),
+                                            Icon(
+                                              Icons.image_outlined,
+                                              color: Colors.white,
+                                              size: 30,
+                                            )
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ],

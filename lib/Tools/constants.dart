@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:external_path/external_path.dart';
 import 'package:flutter/material.dart';
 
 const COLOR_ORANGE = Color.fromRGBO(255, 229, 204, 1.0);
@@ -25,3 +28,7 @@ const TextTheme TEXT_THEME_DEFAULT = TextTheme(
   titleMedium: TextStyle(fontSize: 35),
   titleSmall: TextStyle(fontSize: 25),
 );
+
+//將dir設定為DCIM的路徑，啊我這邊多一個app不知道有沒有用
+//var dcim_path = Directory("$dir/app");
+

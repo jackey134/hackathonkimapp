@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:kim_app/Tools/folders/create_folder.dart';
+
 import '../Tools/SlideRightRoute.dart';
 import '../Tools/constants.dart';
 import 'package:flutter/material.dart';
@@ -52,10 +54,10 @@ class _Step2_video_viewState extends State<Step2_video_view> {
             ),
             GestureDetector(
               behavior: HitTestBehavior.translucent,
-              onTap: () {
+              onTap: ()   {
                 //getVideo(ImageSource.camera);
                 Navigator.push(
-                    context, SlideRightRoute(widget: CameraScreen()));
+                    context, SlideRightRoute(widget:  CameraScreen()));
               },
               child: Container(
                 margin: EdgeInsets.only(left: 120, top: 180),
